@@ -3,7 +3,7 @@ pragma solidity ^0.4.21;
 contract owned {
     address public owner;
 
-    function owned() public {
+    constructor () public {
         owner = msg.sender;
     }
 
@@ -17,7 +17,13 @@ contract owned {
     }
 }
 
-interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) external; }
+interface tokenRecipient {
+    // TODO: 函数实现
+    function receiveApproval(address _from,
+                            uint256 _value,
+                            address _token,
+                            bytes _extraData) external; 
+}
 
 contract TokenERC20 {
     // Public variables of the token
@@ -38,11 +44,11 @@ contract TokenERC20 {
     event Burn(address indexed from, uint256 value);
 
     /**
-     * Constrctor function
+     * constructor function
      *
      * Initializes contract with initial supply tokens to the creator of the contract
      */
-    function TokenERC20 (
+    constructor (
         uint256 initialSupply,
         string tokenName,
         string tokenSymbol
@@ -112,6 +118,8 @@ contract TokenERC20 {
      */
     function approve(address _spender, uint256 _value) public
         returns (bool success) {
+        // 空头支票也可以
+        // 多次执行时，会冲掉之前的额度
         allowance[msg.sender][_spender] = _value;
         return true;
     }
@@ -130,6 +138,7 @@ contract TokenERC20 {
         returns (bool success) {
         tokenRecipient spender = tokenRecipient(_spender);
         if (approve(_spender, _value)) {
+            // 未实现的函数
             spender.receiveApproval(msg.sender, _value, this, _extraData);
             return true;
         }
@@ -177,6 +186,7 @@ contract TokenERC20 {
 
 contract DECToken is owned, TokenERC20 {
 
+    // TODO: 需要有冻结合约状态的标记，以后永不使用。
     uint256 public sellPrice;
     uint256 public buyPrice;
 
@@ -186,7 +196,7 @@ contract DECToken is owned, TokenERC20 {
     event FrozenFunds(address target, bool frozen);
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
-    function DECToken (
+    constructor (
         uint256 initialSupply,
         string tokenName,
         string tokenSymbol

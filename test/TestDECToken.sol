@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
@@ -12,7 +12,7 @@ contract TestDECToken {
   address contractAddress;
   DECToken dec;
 
-  function testInitialBalanceUsingDeployedContract() {
+  function testInitialBalanceUsingDeployedContract() public {
     contractAddress = DeployedAddresses.DECToken();
     dec = DECToken(contractAddress);
     uint expected = 100000000000000000; // dec * decimals

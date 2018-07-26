@@ -1,6 +1,6 @@
 var DEC = artifacts.require("DECToken");
 
-contract('DEC', function(accounts) {
+contract('5. DEC Mint', function(accounts) {
   it("should put 100000000000000000 DEC in the first account", function() {
     return DEC.deployed().then(function(instance) {
       return instance.balanceOf.call(accounts[0]);
@@ -8,7 +8,7 @@ contract('DEC', function(accounts) {
       assert.equal(balance.valueOf(), 100000000000000000, "100000000000000000 wasn't in the first account");
     });
   });
-  it("should send coin correctly", function() {
+  it("should mint coin correctly", function() {
     var dec;
 
     // Get initial balances of first and second account.
@@ -19,6 +19,8 @@ contract('DEC', function(accounts) {
     var account_two_starting_balance;
     var account_one_ending_balance;
     var account_two_ending_balance;
+    var starting_total_supply;
+    var ending_total_supply;
 
     var amount = 10;
 
@@ -30,7 +32,10 @@ contract('DEC', function(accounts) {
       return dec.balanceOf.call(account_two);
     }).then(function(balance) {
       account_two_starting_balance = balance.toNumber();
-      return dec.transfer(account_two, amount, {from: account_one});
+      return dec.totalSupply.call();
+    }).then(function(balance) {
+      starting_total_supply = balance.toNumber();
+      return dec.mintToken(account_two, amount, {from: account_one});
     }).then(function() {
       return dec.balanceOf.call(account_one);
     }).then(function(balance) {
@@ -38,26 +43,13 @@ contract('DEC', function(accounts) {
       return dec.balanceOf.call(account_two);
     }).then(function(balance) {
       account_two_ending_balance = balance.toNumber();
+      return dec.totalSupply.call();
+    }).then(function(balance) {
+      ending_total_supply = balance.toNumber();
 
-      assert.equal(account_one_ending_balance, account_one_starting_balance - amount, "Amount wasn't correctly taken from the sender");
-      assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "Amount wasn't correctly sent to the receiver");
-    });
-  });
-  it("should have empty buy/sell price", function() {
-    var buyPrice;
-    var sellPrice;
-
-    return DEC.deployed().then(function(instance) {
-      dec = instance;
-      return dec.buyPrice.call();
-    }).then(function(outBuyPrice) {
-      buyPrice = outBuyPrice.toNumber();
-      return dec.sellPrice.call();
-    }).then(function(outSellPrice) {
-      sellPrice = outSellPrice.toNumber();
-    }).then(function() {
-      assert.equal(buyPrice, 0, "buyPrice should be 0 initially");
-      assert.equal(sellPrice, 0, "sellPrice should be 0 initially");
+      assert.equal(account_one_ending_balance, account_one_starting_balance, "owner's account shouldn't be increase");
+      assert.equal(ending_total_supply, starting_total_supply + amount, "total supply wasn't increased correctly");
+      assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "target account wasn't increased correctly");
     });
   });
 });
